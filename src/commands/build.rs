@@ -4,10 +4,11 @@ use std::process::Command;
 
 use serde_json::Value;
 
-use crate::component::World;
 use crate::error::RegistryError;
 use crate::process;
 use crate::registry::Extension;
+
+use super::inspect::inspect;
 
 const TARGET: &str = "wasm32-wasip2";
 const INHERITED: [&str; 3] = ["RUSTUP_TOOLCHAIN", "CARGO_TARGET_DIR", "CARGO_BUILD_TARGET"];
@@ -35,14 +36,6 @@ fn build_one(extension: &Extension, out: &Path) -> Result<Vec<String>, RegistryE
     let manifest = extension.manifest();
     let wasm = compile(extension)?;
 
-    process::run(Command::new("wasm-tools").arg("validate").arg(&wasm))?;
-    let wit = process::run(
-        Command::new("wasm-tools")
-            .args(["component", "wit"])
-            .arg(&wasm),
-    )?;
-    let problems = World::parse(&wit).problems(manifest);
-
     let copy = out.join(format!("{}.wasm", manifest.id));
     fs::copy(&wasm, &copy).map_err(|source| RegistryError::Write {
         path: copy.clone(),
@@ -55,7 +48,7 @@ fn build_one(extension: &Extension, out: &Path) -> Result<Vec<String>, RegistryE
         manifest.version,
         copy.display()
     );
-    Ok(problems)
+    inspect(extension, &copy)
 }
 
 fn compile(extension: &Extension) -> Result<PathBuf, RegistryError> {
