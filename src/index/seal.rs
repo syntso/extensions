@@ -6,7 +6,10 @@ use crate::manifest::{Capabilities, Manifest};
 #[derive(Debug, Serialize)]
 pub struct Seal<'a> {
     id: &'a str,
+    name: &'a str,
     version: &'a str,
+    description: &'a str,
+    repository: &'a str,
     sha256: &'a str,
     capabilities: &'a Capabilities,
 }
@@ -15,7 +18,10 @@ impl<'a> Seal<'a> {
     pub fn new(manifest: &'a Manifest, sha256: &'a str) -> Self {
         Self {
             id: &manifest.id,
+            name: &manifest.name,
             version: &manifest.version,
+            description: &manifest.description,
+            repository: &manifest.repository,
             sha256,
             capabilities: &manifest.capabilities,
         }
@@ -43,7 +49,7 @@ mod tests {
 
         assert_eq!(
             json,
-            r#"{"id":"uptime","version":"0.1.0","sha256":"00ff","capabilities":{"call":["ssh.exec"],"storage":false}}"#
+            r#"{"id":"uptime","name":"Uptime","version":"0.1.0","description":"d","repository":"https://example.com","sha256":"00ff","capabilities":{"call":["ssh.exec"],"storage":false}}"#
         );
     }
 }

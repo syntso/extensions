@@ -64,15 +64,16 @@ Open a pull request into `dev` titled `feat: update disk to 0.2.0`.
 - `extensions.toml` and every `extension.toml` it lists: id and version match, `api` is supported (now `0.1`), and every entry in `capabilities.call` is a core action extensions may call.
 - The built component: it exports `describe` and `run`, it is built against the declared API, it imports storage only with `storage = true`, and it imports nothing the host does not provide (no files, no network, no wall clock).
 
-Pull requests are only checked and built. When `dev` is merged into `main`, CI signs every component and publishes `index.json`, the `.wasm` files and their signatures as the release `index-<run>`, marked latest.
+Pull requests are only checked and built. When `dev` is merged into `main`, and once a week, CI builds without secrets, then signs every component and `index.json` in a separate protected job, and publishes them with their signatures as the release `index-<run>`, marked latest.
 
 ## Verify a download
 
 ```bash
-minisign -V -p registry.pub -m uptime.wasm -x uptime.wasm.minisig
+minisign -V -p registry.pub -m index.json
+minisign -V -p registry.pub -m uptime.wasm
 ```
 
-The trusted comment of each signature holds the id, version, sha256 and capabilities from `index.json`.
+The trusted comment of `index.json.minisig` holds a serial that only grows and an expiry, so Synt refuses an older or stale index. The trusted comment of each component's signature holds its id, name, version, description, repository, sha256 and capabilities from `index.json`.
 
 ## License
 
