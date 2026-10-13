@@ -1,0 +1,4 @@
+[[extension]]
+id = "uptime"
+path = "extensions/uptime"
+version = "0.1.0"
