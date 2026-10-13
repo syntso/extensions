@@ -3,42 +3,100 @@ name: build
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
 
 concurrency:
   group: build
   cancel-in-progress: false
 
-permissions:
-  contents: write
+permissions: {}
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      commit: ${{ steps.commit.outputs.commit }}
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: main
           submodules: recursive
+          persist-credentials: false
+      - id: commit
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - run: rustup toolchain install
-      - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
         with:
           tool: wasm-tools
-      - run: cargo build --release
-      - run: target/release/registry check
+      - run: cargo build --release --locked --bin registry
       - run: target/release/registry build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: components
+          path: dist/*.wasm
+          if-no-files-found: error
+          retention-days: 1
+
+  sign:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment: registry
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.build.outputs.commit }}
+          submodules: recursive
+          persist-credentials: false
+      - run: rustup toolchain install
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-tools
+      - run: cargo build --release --locked --bin registry
+      - uses: actions/download-artifact@v4
+        with:
+          name: components
+          path: dist
       - run: target/release/registry publish
         env:
           MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
           MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed
+          path: |
+            dist/index.json
+            dist/index.json.minisig
+            dist/*.wasm
+            dist/*.wasm.minisig
+          if-no-files-found: error
+          retention-days: 1
+
+  release:
+    needs: [build, sign]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed
+          path: dist
       - run: >
-          gh release create "index-${{ github.run_number }}"
-          dist/index.json dist/*.wasm dist/*.wasm.minisig
-          --target "${{ github.sha }}"
+          gh release create "index-${{ github.run_number }}-${{ github.run_attempt }}"
+          dist/index.json dist/index.json.minisig dist/*.wasm dist/*.wasm.minisig
+          --repo "${{ github.repository }}"
+          --target "${{ needs.build.outputs.commit }}"
           --title "Index ${{ github.run_number }}"
-          --notes "Extensions built, signed and indexed from ${{ github.sha }}."
+          --notes "Extensions built, signed and indexed from ${{ needs.build.outputs.commit }}."
           --latest
         env:
           GH_TOKEN: ${{ github.token }}

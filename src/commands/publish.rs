@@ -6,28 +6,50 @@ use std::process::Command;
 use sha2::{Digest, Sha256};
 
 use crate::error::RegistryError;
-use crate::index::{Index, Listing, Seal};
+use crate::index::{Index, IndexSeal, Listing, Seal};
 use crate::process;
 use crate::registry::Extension;
 use crate::signer::Signer;
 
+use super::inspect::inspect;
+
 const PUBLIC_KEY: &str = "registry.pub";
 const INDEX: &str = "index.json";
+const INDEX_SIGNATURE: &str = "index.json.minisig";
 
 pub fn publish(root: &Path, extensions: &[Extension], out: &Path) -> Result<(), RegistryError> {
     let signer = Signer::from_environment(&root.join(PUBLIC_KEY))?;
+    recheck(extensions, out)?;
 
     let listings = extensions
         .iter()
         .map(|extension| list(extension, &signer, out))
         .collect::<Result<Vec<_>, _>>()?;
 
-    let index = Index::new(listings);
+    let index = Index::new(listings).to_json()?;
     let path = out.join(INDEX);
+    write(&path, &index)?;
 
-    write(&path, &index.to_json()?)?;
+    let seal = IndexSeal::now().to_json()?;
+    let signature = signer.sign(index.as_bytes(), &seal)?;
+    write(&out.join(INDEX_SIGNATURE), &signature)?;
 
-    println!("wrote {}", path.display());
+    println!("wrote and signed {}", path.display());
+    Ok(())
+}
+
+fn recheck(extensions: &[Extension], out: &Path) -> Result<(), RegistryError> {
+    let mut problems = Vec::new();
+
+    for extension in extensions {
+        let wasm = out.join(format!("{}.wasm", extension.manifest().id));
+        problems.extend(inspect(extension, &wasm)?);
+    }
+
+    if !problems.is_empty() {
+        return Err(RegistryError::Invalid(problems));
+    }
+
     Ok(())
 }
 

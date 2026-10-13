@@ -2,7 +2,8 @@
 
 ## Branches
 
-- `main` holds what is published. Every push to it builds, signs and releases the index.
+- `main` holds what is published. Every push to it, and a weekly run that keeps the index fresh, builds, signs and releases the index.
+- The build runs without secrets. Signing runs in a separate job, in the protected `registry` environment that holds the minisign key: it builds only the `registry` tool, checks the built components again and signs them together with `index.json`.
 - `dev` is where changes come together. Branch from it, and open pull requests into it.
 - Name branches after the change: `feat/add-disk`, `feat/update-uptime`, `fix/index-format`.
 
