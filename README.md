@@ -61,8 +61,9 @@ Open a pull request into `dev` titled `feat: update disk to 0.2.0`.
 
 ## What CI checks
 
-- `extensions.toml` and every `extension.toml` it lists: id and version match, `api` is supported (now `0.1`), and every entry in `capabilities.call` is a core action extensions may call.
-- The built component: it exports `describe` and `run`, it is built against the declared API, it imports storage only with `storage = true`, and it imports nothing the host does not provide (no files, no network, no wall clock).
+- `extensions.toml` and every `extension.toml` it lists: id and version match, `api` is supported (`0.1` and `0.2`), and every entry in `capabilities.call` is a core action extensions may call. For API 0.2: `http` hosts are plain host names with an optional port, every secret goes only to listed hosts, `documents = true` comes with `contributes.document` types, events and file access are known values, and commands and menu entries run the extension's own actions. `contributes` and the new capabilities need `api = "0.2"`.
+- The built component: it exports what its API asks for (`describe` and `run` for 0.1; also `start`, `render`, `panel-message`, `asset`, `on-event`, `on-timer` and `merge` for 0.2), every `synt:extension` interface it imports is of the declared API, it imports only interfaces its manifest asks for (`storage`, `http`, `documents`, `files`, `timers`), and nothing the host does not provide (no files, no network, no wall clock).
+- The index lists each extension's `contributes`, so the core shows the app what it adds before it is installed.
 
 Pull requests are only checked and built. When `dev` is merged into `main`, and once a week, CI builds without secrets, then signs every component and `index.json` in a separate protected job, and publishes them with their signatures as the release `index-<run>`, marked latest.
 

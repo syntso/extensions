@@ -1,4 +1,4 @@
-use super::{APIS, CALLS};
+use super::{APIS, CALLS, reach};
 use crate::manifest::Manifest;
 use crate::registry::Entry;
 
@@ -10,6 +10,7 @@ pub fn problems(entry: &Entry, manifest: &Manifest) -> Vec<String> {
     problems.extend(identity(entry, manifest));
     problems.extend(fields(manifest));
     problems.extend(capabilities(manifest));
+    problems.extend(reach(manifest));
 
     problems
         .into_iter()
@@ -106,7 +107,7 @@ fn is_version(version: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::manifest::Capabilities;
+    use crate::manifest::{Capabilities, Contributions};
 
     fn entry() -> Entry {
         Entry {
@@ -126,8 +127,9 @@ mod tests {
             repository: "https://github.com/syntso/extension-uptime".to_owned(),
             capabilities: Capabilities {
                 call: vec!["ssh.exec".to_owned()],
-                storage: false,
+                ..Capabilities::default()
             },
+            contributes: Contributions::default(),
         }
     }
 
@@ -162,13 +164,13 @@ mod tests {
     #[test]
     fn rejects_an_unsupported_api() {
         let manifest = Manifest {
-            api: "0.2".to_owned(),
+            api: "0.3".to_owned(),
             ..manifest()
         };
 
         assert_eq!(
             problems(&entry(), &manifest),
-            ["uptime: api 0.2 is not supported, only 0.1"]
+            ["uptime: api 0.3 is not supported, only 0.1, 0.2"]
         );
     }
 
