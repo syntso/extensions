@@ -1,4 +1,4 @@
-pub const APIS: &[&str] = &["0.1"];
+pub const APIS: &[&str] = &["0.1", "0.2"];
 
 pub const CALLS: &[&str] = &[
     "core.ping",
@@ -22,3 +22,7 @@ pub const CALLS: &[&str] = &[
     "tunnel.list",
     "tunnel.open",
 ];
+
+pub const EVENTS: &[&str] = &["journal", "session", "resource", "approval"];
+
+pub const FILE_ACCESS: &[&str] = &["read", "read-write"];
