@@ -1,0 +1,136 @@
+{
+  "actions": [
+    {
+      "agents": true,
+      "description": "Lists the containers on a host with their image, state and ports.",
+      "name": "containers",
+      "output": {
+        "type": "array"
+      },
+      "params": {
+        "properties": {
+          "all": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "risk": "read",
+      "targets": [
+        "host"
+      ],
+      "title": "List containers"
+    },
+    {
+      "agents": true,
+      "name": "restart",
+      "risk": "write",
+      "targets": [
+        "docker.container"
+      ],
+      "title": "Restart a container"
+    },
+    {
+      "name": "refresh",
+      "risk": "read",
+      "title": "Refresh"
+    }
+  ],
+  "capabilities": {
+    "call": [
+      "ssh.exec",
+      "registry-auth.token"
+    ],
+    "dialogs": true,
+    "events": [
+      "resource"
+    ],
+    "notifications": true,
+    "progress": true,
+    "resources": [
+      "host"
+    ],
+    "storage": true,
+    "terminal": true,
+    "timers": true
+  },
+  "contributes": {
+    "commands": [
+      {
+        "action": "docker.refresh",
+        "keys": "cmd-shift-d",
+        "title": "Docker: refresh"
+      }
+    ],
+    "menus": [
+      {
+        "action": "docker.containers",
+        "on": "resource:host",
+        "title": "Show containers"
+      }
+    ],
+    "panels": [
+      {
+        "id": "logs",
+        "title": "Container logs",
+        "view": "logs"
+      }
+    ],
+    "resources": [
+      {
+        "icon": "box",
+        "kind": "container",
+        "schema": {
+          "properties": {
+            "container": {
+              "type": "string"
+            },
+            "host": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "host",
+            "container"
+          ],
+          "type": "object"
+        },
+        "title": "Container",
+        "via": "host"
+      }
+    ],
+    "settings": {
+      "schema": {
+        "properties": {
+          "poll_seconds": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "sidebar": [
+      {
+        "icon": "box",
+        "id": "docker",
+        "title": "Docker",
+        "tree": "hosts"
+      }
+    ],
+    "status": [
+      {
+        "id": "unhealthy",
+        "title": "Unhealthy containers",
+        "view": "unhealthy"
+      }
+    ]
+  },
+  "dependencies": {
+    "registry-auth": "^1.2"
+  },
+  "description": "Containers on your hosts, as resources.",
+  "id": "docker",
+  "name": "Docker",
+  "repository": "https://github.com/someone/synt-docker",
+  "version": "1.0.0"
+}

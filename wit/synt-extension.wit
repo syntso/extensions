@@ -1,0 +1,322 @@
+package synt:extension@1.0.0;
+
+interface types {
+    type json = string;
+
+    enum risk {
+        read,
+        write,
+        privileged,
+    }
+
+    enum level {
+        trace,
+        debug,
+        info,
+        warn,
+        error,
+    }
+
+    record error {
+        code: string,
+        message: string,
+    }
+
+    variant actor {
+        person,
+        core,
+        agent(string),
+        runbook(string),
+        extension(string),
+    }
+
+    record invocation {
+        action: string,
+        target: option<string>,
+        params: json,
+        actor: actor,
+        project: option<string>,
+    }
+
+    record binding {
+        action: string,
+        target: option<string>,
+        params: json,
+    }
+
+    record event {
+        topic: string,
+        payload: json,
+    }
+
+    record tree-item {
+        id: string,
+        title: string,
+        subtitle: option<string>,
+        icon: option<string>,
+        expandable: bool,
+        open: option<binding>,
+        subject: option<string>,
+    }
+}
+
+interface host {
+    use types.{error, json, level};
+
+    call: func(action: string, target: option<string>, params: json) -> result<json, error>;
+    log: func(level: level, message: string);
+    settings: func() -> json;
+}
+
+interface storage {
+    use types.{error};
+
+    get: func(key: string) -> option<list<u8>>;
+    set: func(key: string, value: list<u8>) -> result<_, error>;
+    remove: func(key: string) -> result<_, error>;
+    keys: func(prefix: string) -> result<list<string>, error>;
+}
+
+interface cache {
+    use types.{error};
+
+    get: func(key: string) -> option<list<u8>>;
+    put: func(key: string, value: list<u8>, ttl-seconds: u32) -> result<_, error>;
+    remove: func(key: string);
+}
+
+interface http {
+    use types.{error};
+
+    record header {
+        name: string,
+        value: string,
+    }
+
+    record secret-header {
+        name: string,
+        secret: string,
+        prefix: string,
+    }
+
+    record request {
+        method: string,
+        url: string,
+        headers: list<header>,
+        secrets: list<secret-header>,
+        body: option<list<u8>>,
+        timeout-ms: option<u32>,
+    }
+
+    record response {
+        status: u16,
+        headers: list<header>,
+        body: list<u8>,
+    }
+
+    send: func(request: request) -> result<response, error>;
+}
+
+interface documents {
+    use types.{error};
+
+    record document-info {
+        project: string,
+        path: string,
+        kind: string,
+        revision: string,
+        size: u64,
+    }
+
+    record document {
+        info: document-info,
+        body: list<u8>,
+    }
+
+    record written {
+        info: document-info,
+        merged: bool,
+    }
+
+    listing: func(project: string) -> result<list<document-info>, error>;
+    read: func(project: string, path: string) -> result<document, error>;
+    write: func(project: string, path: string, body: list<u8>, base: option<string>) -> result<written, error>;
+    remove: func(project: string, path: string) -> result<_, error>;
+}
+
+interface files {
+    use types.{error};
+
+    enum access {
+        read,
+        read-write,
+    }
+
+    record picked {
+        handle: string,
+        name: string,
+        access: access,
+    }
+
+    chosen: func() -> list<picked>;
+    read: func(handle: string) -> result<list<u8>, error>;
+    write: func(handle: string, body: list<u8>) -> result<_, error>;
+}
+
+interface resources {
+    use types.{error, json};
+
+    record project {
+        id: string,
+        name: string,
+    }
+
+    record %resource {
+        address: string,
+        project: string,
+        name: string,
+        kind: string,
+        fields: json,
+    }
+
+    projects: func() -> list<project>;
+    listing: func(project: string, kind: option<string>) -> result<list<%resource>, error>;
+    get: func(address: string) -> result<%resource, error>;
+    put: func(project: string, name: string, kind: string, fields: json) -> result<%resource, error>;
+    remove: func(project: string, name: string) -> result<_, error>;
+}
+
+interface timers {
+    use types.{error};
+
+    set: func(name: string, every-seconds: u32) -> result<_, error>;
+    clear: func(name: string);
+}
+
+interface terminal {
+    use types.{error};
+
+    record size {
+        cols: u16,
+        rows: u16,
+    }
+
+    record output {
+        bytes: list<u8>,
+        next: u64,
+        ended: bool,
+    }
+
+    open: func(target: option<string>, size: size) -> result<u64, error>;
+    write: func(session: u64, input: list<u8>) -> result<_, error>;
+    read: func(session: u64, after: u64) -> result<output, error>;
+    close: func(session: u64) -> result<_, error>;
+}
+
+interface notifications {
+    use types.{binding, error};
+
+    enum tone {
+        info,
+        success,
+        warning,
+        error,
+    }
+
+    record button {
+        title: string,
+        binding: binding,
+    }
+
+    record notification {
+        tone: tone,
+        title: string,
+        body: option<string>,
+        buttons: list<button>,
+    }
+
+    notify: func(notification: notification) -> result<u64, error>;
+    dismiss: func(id: u64);
+}
+
+interface dialogs {
+    use types.{error};
+    use files.{access, picked};
+
+    record confirmation {
+        title: string,
+        message: string,
+        confirm: string,
+        destructive: bool,
+    }
+
+    record prompt {
+        title: string,
+        message: option<string>,
+        placeholder: option<string>,
+        initial: option<string>,
+    }
+
+    record choice {
+        id: string,
+        title: string,
+        detail: option<string>,
+    }
+
+    record selection {
+        title: string,
+        choices: list<choice>,
+        many: bool,
+    }
+
+    confirm: func(dialog: confirmation) -> result<bool, error>;
+    input: func(dialog: prompt) -> result<option<string>, error>;
+    pick: func(dialog: selection) -> result<list<string>, error>;
+    choose-file: func(title: string, access: access) -> result<option<picked>, error>;
+    ask-secret: func(secret: string, title: string) -> result<bool, error>;
+}
+
+interface progress {
+    use types.{error};
+
+    begin: func(title: string, cancellable: bool) -> result<u64, error>;
+    report: func(task: u64, done: option<f32>, message: option<string>) -> result<_, error>;
+    end: func(task: u64);
+    cancelled: func(task: u64) -> bool;
+}
+
+interface ui {
+    use types.{error, json};
+
+    patch-view: func(view: string, patch: json) -> result<_, error>;
+    refresh-tree: func(tree: string, item: option<string>) -> result<_, error>;
+    post: func(panel: string, message: json) -> result<_, error>;
+}
+
+world extension {
+    import host;
+    import storage;
+    import cache;
+    import http;
+    import documents;
+    import files;
+    import resources;
+    import timers;
+    import terminal;
+    import notifications;
+    import dialogs;
+    import progress;
+    import ui;
+
+    use types.{error, event, invocation, json, tree-item};
+
+    export run: func(invocation: invocation) -> result<json, error>;
+    export start: func() -> result<_, error>;
+    export render: func(view: string, target: option<string>, params: json) -> result<json, error>;
+    export children: func(tree: string, parent: option<string>) -> result<list<tree-item>, error>;
+    export panel-message: func(panel: string, message: json) -> result<json, error>;
+    export asset: func(path: string) -> option<list<u8>>;
+    export on-event: func(event: event) -> result<_, error>;
+    export on-timer: func(name: string) -> result<_, error>;
+    export merge: func(kind: string, base: option<list<u8>>, ours: list<u8>, theirs: list<u8>) -> result<list<u8>, error>;
+}

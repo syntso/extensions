@@ -1,0 +1,43 @@
+[package]
+name = "synt-registry"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+license = "Apache-2.0"
+repository = "https://github.com/syntso/extensions"
+publish = false
+
+[[bin]]
+name = "registry"
+path = "src/main.rs"
+
+[dependencies]
+data-encoding = "2.11.1"
+jsonc-parser = "0.34.0"
+jsonschema = { version = "0.60.0", default-features = false }
+minisign = "0.10.0"
+semver = "1.0.28"
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+sha2 = "0.11.1"
+thiserror = "2.0.21"
+wasmparser = { version = "0.262.0", default-features = false, features = ["std", "component-model"] }
+
+[dev-dependencies]
+minisign-verify = "0.3.0"
+wat = "1.262.0"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+dbg_macro = "warn"
+todo = "warn"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+
+[profile.release]
+codegen-units = 1

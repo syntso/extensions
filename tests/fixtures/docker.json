@@ -1,0 +1,56 @@
+// extension.json
+{
+  "$schema": "https://synt.so/extension.schema.json",
+  "id": "docker",
+  "name": "Docker",
+  "version": "1.0.0",
+  "description": "Containers on your hosts, as resources.",
+  "repository": "https://github.com/someone/synt-docker",
+  "dependencies": { "registry-auth": "^1.2" },
+  "capabilities": {
+    "call": ["ssh.exec", "registry-auth.token"],
+    "storage": true,
+    "resources": ["host"],
+    "events": ["resource"],
+    "timers": true,
+    "terminal": true,
+    "notifications": true,
+    "dialogs": true,
+    "progress": true,
+  },
+  "actions": [
+    {
+      "name": "containers",
+      "title": "List containers",
+      "description": "Lists the containers on a host with their image, state and ports.",
+      "risk": "read",
+      "targets": ["host"],
+      "params": { "type": "object", "properties": { "all": { "type": "boolean" } } },
+      "output": { "type": "array" },
+      "agents": true
+    },
+    { "name": "restart", "title": "Restart a container", "risk": "write", "targets": ["docker.container"], "agents": true },
+    { "name": "refresh", "title": "Refresh", "risk": "read" }
+  ],
+  "contributes": {
+    "resources": [
+      {
+        "kind": "container",
+        "title": "Container",
+        "icon": "box",
+        "via": "host",
+        "schema": {
+          "type": "object",
+          "required": ["host", "container"],
+          "properties": { "host": { "type": "string" }, "container": { "type": "string" } }
+        }
+      }
+    ],
+    "commands": [{ "title": "Docker: refresh", "action": "docker.refresh", "keys": "cmd-shift-d" }],
+    "menus": [{ "title": "Show containers", "action": "docker.containers", "on": "resource:host" }],
+    "sidebar": [{ "id": "docker", "title": "Docker", "icon": "box", "tree": "hosts" }],
+    "panels": [{ "id": "logs", "title": "Container logs", "view": "logs" }],
+    "status": [{ "id": "unhealthy", "title": "Unhealthy containers", "view": "unhealthy" }],
+    "settings": { "schema": { "type": "object", "properties": { "poll_seconds": { "type": "integer" } } } }
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "id": "every",
+  "name": "Everything",
+  "version": "1.0.0",
+  "description": "Uses every capability, export and contribution point of synt:extension 1.0.0.",
+  "repository": "https://github.com/syntso/core",
+
+  "capabilities": {
+    "call": ["core.ping", "test.touch"],
+    "storage": true,
+    "http": ["127.0.0.1:8765"],
+    "secrets": { "test/token": ["127.0.0.1:8765"], "every/*": ["127.0.0.1:8765"] },
+    "documents": true,
+    "resources": ["host"],
+    "events": ["journal", "approval", "session", "resource"],
+    "timers": true,
+    "files": "read-write",
+    "terminal": true,
+    "notifications": true,
+    "dialogs": true,
+    "progress": true
+  },
+
+  "actions": [
+    {
+      "name": "ping",
+      "title": "Call core.ping",
+      "description": "Pings the core through the extension and returns what the core answered.",
+      "risk": "read",
+      "output": { "type": "object", "properties": { "core": { "type": "string" } } },
+      "agents": true
+    },
+    {
+      "name": "fetch",
+      "title": "Send an HTTP request",
+      "risk": "read",
+      "params": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": { "type": "string" },
+          "method": { "type": "string" },
+          "secret": { "type": "string" },
+          "body": { "type": "string" }
+        }
+      }
+    },
+    { "name": "settings", "title": "Read the settings", "risk": "read" },
+    {
+      "name": "relay",
+      "title": "Call any action through host.call",
+      "risk": "write",
+      "params": {
+        "type": "object",
+        "required": ["action"],
+        "properties": {
+          "action": { "type": "string" },
+          "target": { "type": "string" },
+          "params": { "type": "object" }
+        }
+      }
+    },
+    {
+      "name": "shared",
+      "title": "Answer an extension that depends on this one",
+      "description": "Returns the text it was given and who called.",
+      "risk": "read",
+      "params": { "type": "object", "properties": { "text": { "type": "string" } } },
+      "dependents": true
+    },
+    {
+      "name": "inspect",
+      "title": "Show what the extension was called with",
+      "description": "Returns the action, target, project, actor and subject of the call.",
+      "risk": "read",
+      "params": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer", "minimum": 0, "maximum": 10 },
+          "ratio": { "type": "number" }
+        }
+      },
+      "output": { "type": "object" },
+      "agents": true
+    },
+    {
+      "name": "inspect_on",
+      "title": "Show what the extension was called with on a resource",
+      "risk": "read",
+      "targets": ["host", "every.box"],
+      "params": { "type": "object" },
+      "agents": true
+    },
+    {
+      "name": "remember",
+      "title": "Keep a value in storage",
+      "risk": "read",
+      "params": {
+        "type": "object",
+        "required": ["key", "value"],
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "string" },
+          "repeat": { "type": "integer" }
+        }
+      }
+    },
+    { "name": "recall", "title": "Read a value from storage", "risk": "read", "params": { "type": "object", "required": ["key"], "properties": { "key": { "type": "string" } } } },
+    { "name": "forget", "title": "Remove a value from storage", "risk": "read", "params": { "type": "object", "required": ["key"], "properties": { "key": { "type": "string" } } } },
+    { "name": "keys", "title": "List storage keys", "risk": "read", "params": { "type": "object", "properties": { "prefix": { "type": "string" } } } },
+    {
+      "name": "stash",
+      "title": "Keep a value in the cache",
+      "risk": "read",
+      "params": {
+        "type": "object",
+        "required": ["key", "value", "ttl_seconds"],
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "string" },
+          "ttl_seconds": { "type": "integer" }
+        }
+      }
+    },
+    { "name": "unstash", "title": "Read a value from the cache", "risk": "read", "params": { "type": "object", "required": ["key"], "properties": { "key": { "type": "string" } } } },
+    { "name": "evict", "title": "Remove a value from the cache", "risk": "read", "params": { "type": "object", "required": ["key"], "properties": { "key": { "type": "string" } } } },
+    {
+      "name": "arm",
+      "title": "Set a timer",
+      "risk": "read",
+      "params": { "type": "object", "required": ["name", "seconds"], "properties": { "name": { "type": "string" }, "seconds": { "type": "integer" } } }
+    },
+    { "name": "disarm", "title": "Clear a timer", "risk": "read", "params": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" } } } },
+    { "name": "heard", "title": "Report what events, timers and the start left in storage", "risk": "read" },
+    {
+      "name": "write",
+      "title": "Write a note document",
+      "risk": "write",
+      "params": {
+        "type": "object",
+        "required": ["project", "path", "text"],
+        "properties": {
+          "project": { "type": "string" },
+          "path": { "type": "string" },
+          "text": { "type": "string" },
+          "base": { "type": ["string", "null"] }
+        }
+      }
+    },
+    { "name": "read", "title": "Read a note document", "risk": "read", "params": { "type": "object", "required": ["project", "path"], "properties": { "project": { "type": "string" }, "path": { "type": "string" } } } },
+    { "name": "list", "title": "List the note documents", "risk": "read", "params": { "type": "object", "required": ["project"], "properties": { "project": { "type": "string" } } } },
+    { "name": "remove", "title": "Remove a note document", "risk": "write", "params": { "type": "object", "required": ["project", "path"], "properties": { "project": { "type": "string" }, "path": { "type": "string" } } } },
+    { "name": "files", "title": "List the picked files", "risk": "read" },
+    { "name": "read_file", "title": "Read a picked file", "risk": "read", "params": { "type": "object", "required": ["handle"], "properties": { "handle": { "type": "string" } } } },
+    { "name": "write_file", "title": "Write a picked file", "risk": "write", "params": { "type": "object", "required": ["handle", "text"], "properties": { "handle": { "type": "string" }, "text": { "type": "string" } } } },
+    { "name": "projects", "title": "List the projects", "risk": "read" },
+    {
+      "name": "resources",
+      "title": "List resources of a project",
+      "risk": "read",
+      "params": { "type": "object", "required": ["project"], "properties": { "project": { "type": "string" }, "kind": { "type": "string" } } }
+    },
+    { "name": "resource", "title": "Read one resource", "risk": "read", "params": { "type": "object", "required": ["address"], "properties": { "address": { "type": "string" } } } },
+    {
+      "name": "put",
+      "title": "Keep a box in a project",
+      "risk": "write",
+      "params": {
+        "type": "object",
+        "required": ["project", "name", "fields"],
+        "properties": {
+          "project": { "type": "string" },
+          "name": { "type": "string" },
+          "kind": { "type": "string" },
+          "fields": { "type": "object" }
+        }
+      }
+    },
+    { "name": "discard", "title": "Remove a box from a project", "risk": "write", "params": { "type": "object", "required": ["project", "name"], "properties": { "project": { "type": "string" }, "name": { "type": "string" } } } },
+    {
+      "name": "open_box",
+      "title": "Open a box",
+      "description": "Returns the fields of the box it is called on.",
+      "risk": "read",
+      "targets": ["every.box"],
+      "agents": true
+    },
+    { "name": "terminal_open", "title": "Open a terminal", "risk": "write", "params": { "type": "object", "properties": { "host": { "type": "string" } } } },
+    { "name": "terminal_write", "title": "Type into a terminal", "risk": "write", "params": { "type": "object", "required": ["session", "text"], "properties": { "session": { "type": "integer" }, "text": { "type": "string" } } } },
+    { "name": "terminal_read", "title": "Read a terminal", "risk": "read", "params": { "type": "object", "required": ["session"], "properties": { "session": { "type": "integer" }, "after": { "type": "integer" } } } },
+    { "name": "terminal_close", "title": "Close a terminal", "risk": "write", "params": { "type": "object", "required": ["session"], "properties": { "session": { "type": "integer" } } } },
+    {
+      "name": "notify",
+      "title": "Show a notification",
+      "risk": "read",
+      "params": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "tone": { "type": "string", "enum": ["info", "success", "warning", "error"] },
+          "title": { "type": "string" },
+          "body": { "type": "string" },
+          "buttons": { "type": "integer" },
+          "button_action": { "type": "string" },
+          "count": { "type": "integer" }
+        }
+      }
+    },
+    { "name": "dismiss", "title": "Dismiss a notification", "risk": "read", "params": { "type": "object", "required": ["id"], "properties": { "id": { "type": "integer" } } } },
+    {
+      "name": "ask",
+      "title": "Ask the person something",
+      "risk": "read",
+      "params": {
+        "type": "object",
+        "required": ["kind"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["confirm", "input", "pick", "many", "file", "secret"] },
+          "title": { "type": "string" },
+          "secret": { "type": "string" },
+          "times": { "type": "integer" }
+        }
+      },
+      "agents": true
+    },
+    { "name": "task_begin", "title": "Begin a task", "risk": "read", "params": { "type": "object", "required": ["title"], "properties": { "title": { "type": "string" }, "cancellable": { "type": "boolean" } } } },
+    { "name": "task_report", "title": "Report progress of a task", "risk": "read", "params": { "type": "object", "required": ["task"], "properties": { "task": { "type": "integer" }, "percent": { "type": "integer", "minimum": 0, "maximum": 100 }, "message": { "type": "string" } } } },
+    { "name": "task_end", "title": "End a task", "risk": "read", "params": { "type": "object", "required": ["task"], "properties": { "task": { "type": "integer" } } } },
+    { "name": "task_cancelled", "title": "Tell whether a task was cancelled", "risk": "read", "params": { "type": "object", "required": ["task"], "properties": { "task": { "type": "integer" } } } },
+    { "name": "refresh", "title": "Refresh the boxes tree", "risk": "read", "params": { "type": "object", "properties": { "item": { "type": "string" } } } },
+    { "name": "patch", "title": "Patch the overview view", "risk": "read" },
+    { "name": "post", "title": "Post a message to the editor panel", "risk": "read", "params": { "type": "object", "properties": { "message": {} } } }
+  ],
+
+  "contributes": {
+    "resources": [
+      {
+        "kind": "box",
+        "title": "Box",
+        "icon": "box",
+        "via": "host",
+        "schema": {
+          "type": "object",
+          "required": ["label"],
+          "properties": {
+            "label": { "type": "string" },
+            "size": { "type": "integer" },
+            "host": { "type": "string" },
+            "token": { "type": "string" }
+          }
+        }
+      }
+    ],
+    "documents": [{ "type": "note", "title": "Note", "suffix": "note", "panel": "editor" }],
+    "commands": [
+      { "title": "Everything: ping", "action": "every.ping", "keys": "cmd-shift-e" },
+      { "title": "Everything: inspect", "action": "every.inspect", "params": { "from": "palette" }, "keys": "cmd-k cmd-e" }
+    ],
+    "menus": [
+      { "title": "Inspect resource", "action": "every.inspect_on", "on": "resource" },
+      { "title": "Open box", "action": "every.open_box", "on": "resource:every.box", "group": "box" },
+      { "title": "Inspect host", "action": "every.inspect_on", "on": "resource:host" },
+      { "title": "Inspect session", "action": "every.inspect", "on": "session" },
+      { "title": "Inspect file", "action": "every.inspect_on", "on": "file" },
+      { "title": "Inspect journal entry", "action": "every.inspect", "on": "journal" },
+      { "title": "Inspect note", "action": "every.inspect", "on": "document:note" },
+      { "title": "Inspect box in tree", "action": "every.inspect_on", "on": "tree:boxes" }
+    ],
+    "sidebar": [
+      { "id": "overview", "title": "Everything", "icon": "box", "view": "overview" },
+      { "id": "boxes", "title": "Boxes", "icon": "box", "tree": "boxes" }
+    ],
+    "panels": [
+      { "id": "editor", "title": "Note editor", "entry": "index.html" },
+      { "id": "board", "title": "Board", "view": "board" }
+    ],
+    "status": [{ "id": "beat", "title": "Beat", "view": "beat" }],
+    "settings": {
+      "schema": {
+        "type": "object",
+        "properties": { "greeting": { "type": "string" }, "every": { "type": "integer" } }
+      }
+    }
+  }
+}

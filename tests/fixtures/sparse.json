@@ -1,0 +1,49 @@
+// extension.json with every default spelled out
+{
+  "$schema": "https://synt.so/extension.schema.json",
+  "id": "sparse",
+  "name": "Sparse",
+  "version": "2.1.0-beta.1+build.7",
+  "description": "",
+  "repository": null,
+  "dependencies": { "zeta": "1.2", "alpha": ">=1.0,<2", "mid": "=0.3.1" },
+  "capabilities": {
+    "call": [],
+    "storage": false,
+    "http": [],
+    "secrets": {},
+    "documents": false,
+    "resources": [],
+    "events": [],
+    "timers": false,
+    "files": null,
+    "terminal": false,
+    "notifications": false,
+    "dialogs": false,
+    "progress": false,
+  },
+  "actions": [
+    {
+      "name": "go",
+      "title": "Go",
+      "description": "",
+      "risk": "read",
+      "targets": [],
+      "params": { "type": "object", "properties": {}, "additionalProperties": false, "default": null, "x-ratio": 1.50, "x-big": 12345678901234567890 },
+      "output": null,
+      "agents": false,
+      "dependents": false
+    },
+    { "name": "plain", "title": "Plain", "description": null, "risk": "write" }
+  ],
+  "contributes": {
+    "resources": [],
+    "documents": [],
+    "commands": [{ "title": "Go", "action": "sparse.go", "params": null, "keys": null }],
+    "menus": [{ "title": "Go here", "action": "sparse.go", "on": "session", "group": null }],
+    "sidebar": [{ "id": "side", "title": "Side", "icon": "box", "view": "side", "tree": null }],
+    "panels": [{ "id": "web", "title": "Web", "view": null, "entry": "index.html" }],
+    "status": [],
+    "settings": null
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "board",
+  "name": "Board",
+  "version": "0.2.0",
+  "capabilities": {
+    "http": ["grafana.example.com", "127.0.0.1:3000"],
+    "secrets": { "grafana/token": ["grafana.example.com"] },
+    "documents": true,
+    "files": "read-write"
+  },
+  "actions": [{ "name": "load", "title": "Show load", "risk": "read", "targets": ["host"] }],
+  "contributes": {
+    "documents": [{ "type": "diagram", "title": "Diagram", "suffix": "uml", "panel": "editor" }],
+    "panels": [{ "id": "editor", "title": "Diagram editor", "entry": "panel/index.html" }],
+    "menus": [{ "title": "Edit", "action": "board.load", "on": "document:diagram" }]
+  }
+}

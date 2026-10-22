@@ -1,0 +1,562 @@
+{
+  "$defs": {
+    "ActionName": {
+      "type": "string"
+    },
+    "AssetPath": {
+      "type": "string"
+    },
+    "Capabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "call": {
+          "items": {
+            "$ref": "#/$defs/ActionName"
+          },
+          "type": "array"
+        },
+        "dialogs": {
+          "type": "boolean"
+        },
+        "documents": {
+          "type": "boolean"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/EventTopic"
+          },
+          "type": "array"
+        },
+        "files": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FileAccess"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "http": {
+          "items": {
+            "$ref": "#/$defs/HttpHost"
+          },
+          "type": "array"
+        },
+        "notifications": {
+          "type": "boolean"
+        },
+        "progress": {
+          "type": "boolean"
+        },
+        "resources": {
+          "items": {
+            "$ref": "#/$defs/ResourceKind"
+          },
+          "type": "array"
+        },
+        "secrets": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/HttpHost"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
+        "storage": {
+          "type": "boolean"
+        },
+        "terminal": {
+          "type": "boolean"
+        },
+        "timers": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Command": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionName"
+        },
+        "keys": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Keys"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "params": {
+          "additionalProperties": true,
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "title": {
+          "$ref": "#/$defs/OneLine"
+        }
+      },
+      "required": [
+        "title",
+        "action"
+      ],
+      "type": "object"
+    },
+    "Contributions": {
+      "additionalProperties": false,
+      "properties": {
+        "commands": {
+          "items": {
+            "$ref": "#/$defs/Command"
+          },
+          "type": "array"
+        },
+        "documents": {
+          "items": {
+            "$ref": "#/$defs/DocumentType"
+          },
+          "type": "array"
+        },
+        "menus": {
+          "items": {
+            "$ref": "#/$defs/Menu"
+          },
+          "type": "array"
+        },
+        "panels": {
+          "items": {
+            "$ref": "#/$defs/Panel"
+          },
+          "type": "array"
+        },
+        "resources": {
+          "items": {
+            "$ref": "#/$defs/ResourceContribution"
+          },
+          "type": "array"
+        },
+        "settings": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Settings"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sidebar": {
+          "items": {
+            "$ref": "#/$defs/SidebarSection"
+          },
+          "type": "array"
+        },
+        "status": {
+          "items": {
+            "$ref": "#/$defs/StatusItem"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "Description": {
+      "type": "string"
+    },
+    "DocumentType": {
+      "additionalProperties": false,
+      "properties": {
+        "panel": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "suffix": {
+          "$ref": "#/$defs/Suffix"
+        },
+        "title": {
+          "$ref": "#/$defs/OneLine"
+        },
+        "type": {
+          "$ref": "#/$defs/LocalId"
+        }
+      },
+      "required": [
+        "type",
+        "title",
+        "suffix"
+      ],
+      "type": "object"
+    },
+    "EventTopic": {
+      "enum": [
+        "journal",
+        "session",
+        "resource",
+        "approval"
+      ],
+      "type": "string"
+    },
+    "ExtensionId": {
+      "type": "string"
+    },
+    "FileAccess": {
+      "enum": [
+        "read",
+        "read-write"
+      ],
+      "type": "string"
+    },
+    "HttpHost": {
+      "type": "string"
+    },
+    "Icon": {
+      "type": "string"
+    },
+    "JsonSchema": {
+      "description": "A JSON Schema, at most 64 KiB",
+      "type": "object"
+    },
+    "Keys": {
+      "type": "string"
+    },
+    "LocalId": {
+      "type": "string"
+    },
+    "ManifestAction": {
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "type": "boolean"
+        },
+        "dependents": {
+          "type": "boolean"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Description"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "output": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JsonSchema"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "params": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JsonSchema"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "risk": {
+          "$ref": "#/$defs/Risk"
+        },
+        "targets": {
+          "items": {
+            "$ref": "#/$defs/ResourceKind"
+          },
+          "type": "array"
+        },
+        "title": {
+          "$ref": "#/$defs/OneLine"
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "risk"
+      ],
+      "type": "object"
+    },
+    "Menu": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionName"
+        },
+        "group": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "on": {
+          "$ref": "#/$defs/MenuObject"
+        },
+        "title": {
+          "$ref": "#/$defs/OneLine"
+        }
+      },
+      "required": [
+        "title",
+        "action",
+        "on"
+      ],
+      "type": "object"
+    },
+    "MenuObject": {
+      "type": "string"
+    },
+    "OneLine": {
+      "type": "string"
+    },
+    "Panel": {
+      "additionalProperties": false,
+      "properties": {
+        "entry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssetPath"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "title": {
+          "$ref": "#/$defs/OneLine"
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "type": "object"
+    },
+    "Repository": {
+      "type": "string"
+    },
+    "ResourceContribution": {
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "$ref": "#/$defs/Icon"
+        },
+        "kind": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "schema": {
+          "$ref": "#/$defs/JsonSchema"
+        },
+        "title": {
+          "$ref": "#/$defs/OneLine"
+        },
+        "via": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "title",
+        "icon",
+        "schema"
+      ],
+      "type": "object"
+    },
+    "ResourceKind": {
+      "type": "string"
+    },
+    "Risk": {
+      "enum": [
+        "read",
+        "write",
+        "privileged"
+      ],
+      "type": "string"
+    },
+    "Settings": {
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "required": [
+        "schema"
+      ],
+      "type": "object"
+    },
+    "SidebarSection": {
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "$ref": "#/$defs/Icon"
+        },
+        "id": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "title": {
+          "$ref": "#/$defs/OneLine"
+        },
+        "tree": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "icon"
+      ],
+      "type": "object"
+    },
+    "StatusItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/LocalId"
+        },
+        "title": {
+          "$ref": "#/$defs/OneLine"
+        },
+        "view": {
+          "$ref": "#/$defs/LocalId"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "view"
+      ],
+      "type": "object"
+    },
+    "Suffix": {
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The manifest of a Synt extension",
+  "properties": {
+    "$schema": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ManifestAction"
+      },
+      "type": "array"
+    },
+    "capabilities": {
+      "$ref": "#/$defs/Capabilities",
+      "default": {}
+    },
+    "contributes": {
+      "$ref": "#/$defs/Contributions",
+      "default": {}
+    },
+    "dependencies": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "type": "object"
+    },
+    "description": {
+      "$ref": "#/$defs/Description",
+      "default": ""
+    },
+    "id": {
+      "$ref": "#/$defs/ExtensionId"
+    },
+    "name": {
+      "$ref": "#/$defs/OneLine"
+    },
+    "repository": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Repository"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "version"
+  ],
+  "title": "extension.json",
+  "type": "object"
+}

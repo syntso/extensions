@@ -1,0 +1,62 @@
+{
+  "actions": [
+    {
+      "description": "",
+      "name": "go",
+      "params": {
+        "additionalProperties": false,
+        "default": null,
+        "properties": {},
+        "type": "object",
+        "x-big": 12345678901234567890,
+        "x-ratio": 1.5
+      },
+      "risk": "read",
+      "title": "Go"
+    },
+    {
+      "name": "plain",
+      "risk": "write",
+      "title": "Plain"
+    }
+  ],
+  "capabilities": {},
+  "contributes": {
+    "commands": [
+      {
+        "action": "sparse.go",
+        "title": "Go"
+      }
+    ],
+    "menus": [
+      {
+        "action": "sparse.go",
+        "on": "session",
+        "title": "Go here"
+      }
+    ],
+    "panels": [
+      {
+        "entry": "index.html",
+        "id": "web",
+        "title": "Web"
+      }
+    ],
+    "sidebar": [
+      {
+        "icon": "box",
+        "id": "side",
+        "title": "Side",
+        "view": "side"
+      }
+    ]
+  },
+  "dependencies": {
+    "alpha": ">=1.0, <2",
+    "mid": "=0.3.1",
+    "zeta": "^1.2"
+  },
+  "id": "sparse",
+  "name": "Sparse",
+  "version": "2.1.0-beta.1+build.7"
+}

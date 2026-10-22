@@ -1,0 +1,52 @@
+{
+  "actions": [
+    {
+      "name": "load",
+      "risk": "read",
+      "targets": [
+        "host"
+      ],
+      "title": "Show load"
+    }
+  ],
+  "capabilities": {
+    "documents": true,
+    "files": "read-write",
+    "http": [
+      "grafana.example.com",
+      "127.0.0.1:3000"
+    ],
+    "secrets": {
+      "grafana/token": [
+        "grafana.example.com"
+      ]
+    }
+  },
+  "contributes": {
+    "documents": [
+      {
+        "panel": "editor",
+        "suffix": "uml",
+        "title": "Diagram",
+        "type": "diagram"
+      }
+    ],
+    "menus": [
+      {
+        "action": "board.load",
+        "on": "document:diagram",
+        "title": "Edit"
+      }
+    ],
+    "panels": [
+      {
+        "entry": "panel/index.html",
+        "id": "editor",
+        "title": "Diagram editor"
+      }
+    ]
+  },
+  "id": "board",
+  "name": "Board",
+  "version": "0.2.0"
+}
